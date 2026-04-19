@@ -1,0 +1,55 @@
+# OpenSpace-OpenHands-Evolution 配置示例
+
+# OpenSpace 引擎配置
+openspace:
+  registry_path: "./data/skills"
+  vector_db_url: "chromadb://localhost:8000"
+  evolution_config:
+    min_quality_score: 0.7
+    max_versions: 10
+    auto_share: true
+
+# OpenHands 引擎配置
+openhands:
+  model: "gpt-4"
+  api_key: "${OPENAI_API_KEY}"  # 从环境变量读取
+  sandbox_enabled: true
+  sandbox_config:
+    timeout: 300
+    memory_limit: "2GB"
+  max_iterations: 10
+
+# 监控系统配置
+monitor:
+  quality_threshold: 0.8
+  alert_channels:
+    - email
+    - slack
+  metrics_retention_days: 30
+
+# 治理层配置
+governance:
+  enable_gatekeeping: true
+  enable_fingerprint: true
+  fingerprint_tolerance: 0.8
+  maintenance_schedule: "daily"
+  backup_enabled: true
+  backup_path: "./backups"
+
+# MTL 配置
+mtl:
+  similarity_threshold: 0.7
+  model_path: "./models/mtl_encoder.pth"
+  negative_transfer_threshold: 0.3
+
+# AAIP 配置
+aaip:
+  skill_sharing_enabled: true
+  sharing_scope: "global"  # global, organization, project
+  registry_url: "https://open-space.cloud/api"
+
+# 系统配置
+system:
+  log_level: "INFO"
+  max_concurrent_tasks: 5
+  task_timeout: 600

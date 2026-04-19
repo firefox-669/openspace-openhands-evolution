@@ -1,0 +1,39 @@
+# OpenSpace-OpenHands-Evolution 依赖包
+
+# 核心依赖
+asyncio-mqtt>=0.16.0
+pydantic>=2.0.0
+pyyaml>=6.0
+
+# OpenSpace 相关
+chromadb>=0.4.0  # 向量数据库
+sqlite-utils>=3.0  # SQLite 工具
+
+# OpenHands 相关
+# openhands-ai>=0.1.0  # 需要安装 OpenHands SDK
+
+# MTL (Memory Transfer Learning)
+torch>=2.0.0
+torch-geometric>=2.3.0  # 图神经网络
+numpy>=1.24.0
+scikit-learn>=1.3.0
+
+# AAIP (Agent Interoperability Protocol)
+cryptography>=41.0.0  # 数字签名
+jsonschema>=4.19.0  # JSON Schema 验证
+
+# 监控和日志
+prometheus-client>=0.17.0  # 指标收集
+structlog>=23.0.0  # 结构化日志
+
+# 工具库
+aiohttp>=3.8.0  # 异步 HTTP
+tenacity>=8.2.0  # 重试机制
+tqdm>=4.65.0  # 进度条
+
+# 开发依赖（可选）
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.5.0
