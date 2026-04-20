@@ -156,6 +156,48 @@ async def example_system_status():
     print()
 
 
+async def example_interpretable_reasoning():
+    """示例 5: 可解释推理轨迹（RadAgent 风格）"""
+    print("="*60)
+    print("示例 5: 可解释推理轨迹")
+    print("="*60)
+    
+    orchestrator = EvolutionOrchestrator(CONFIG)
+    
+    task = TaskRequest(
+        id="task-interpretable",
+        description="创建 REST API",
+        project_id="demo-project",
+        language="python"
+    )
+    
+    result = await orchestrator.execute_task(task)
+    
+    # 显示推理轨迹
+    if result.reasoning_trace:
+        print(f"\n📊 推理轨迹 ({len(result.reasoning_trace)} 步):")
+        for i, step in enumerate(result.reasoning_trace, 1):
+            print(f"\n  步骤 {i}: [{step['layer'].upper()}] {step['step']}")
+            print(f"    时间: {step['timestamp']}")
+            if 'skills_found' in step:
+                print(f"    找到技能: {step['skills_found']}")
+            if 'skills_adapted' in step:
+                print(f"    适配技能: {step['skills_adapted']}")
+            if 'success' in step:
+                print(f"    执行结果: {'✅ 成功' if step['success'] else '❌ 失败'}")
+    
+    # 显示执行步骤
+    if result.execution_steps:
+        print(f"\n⚙️  执行步骤 ({len(result.execution_steps)} 步):")
+        for i, step in enumerate(result.execution_steps, 1):
+            print(f"\n  步骤 {i}: {step['step']}")
+            for key, value in step.items():
+                if key != 'step':
+                    print(f"    {key}: {value}")
+    
+    print()
+
+
 async def main():
     """运行所有示例"""
     print("\n")
@@ -169,6 +211,7 @@ async def main():
     await example_cross_project_transfer()
     await example_failure_prediction()
     await example_system_status()
+    await example_interpretable_reasoning()  # 新增
     
     print("所有示例运行完成! 🎉")
 

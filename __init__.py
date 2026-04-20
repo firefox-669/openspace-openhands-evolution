@@ -1,29 +1,77 @@
 """
-OpenSpace-OpenHands-Evolution 包
+OpenSpace-OpenHands-Evolution
 
-完整的自进化 AI 编程助手系统，整合：
-- OpenSpace: 记忆管理 + 技能进化
-- OpenHands: 代码执行 + 任务规划  
-- MTL + AAIP: 跨项目知识迁移 + 标准化互操作
-- 四阶段治理: 准入、运行、维护、进化
-
-命令行使用:
-    openspace-evolution                    # 交互模式
-    openspace-evolution run "创建 API"     # 单查询模式
-    openspace-evolution status             # 查看状态
+Self-evolving AI programming assistant with hierarchical agent architecture.
 """
 
-__version__ = "0.1.0"
+from importlib import import_module as _imp
+from typing import TYPE_CHECKING as _TYPE_CHECKING
+
+if _TYPE_CHECKING:
+    from .orchestrator import (
+        EvolutionOrchestrator as EvolutionOrchestrator,
+        TaskRequest as TaskRequest,
+        TransferRequest as TransferRequest,
+        TaskResult as TaskResult,
+        TransferResult as TransferResult,
+    )
+    from .config_loader import (
+        load_config as load_config,
+        save_config as save_config,
+        create_default_config as create_default_config,
+    )
+
+__version__ = "0.1.1"
 __author__ = "OpenSpace Team"
 
-from .orchestrator import EvolutionOrchestrator, TaskRequest, TransferRequest
-from .config_loader import load_config, save_config, create_default_config
-
 __all__ = [
-    'EvolutionOrchestrator',
-    'TaskRequest',
-    'TransferRequest',
-    'load_config',
-    'save_config',
-    'create_default_config',
+    # Version
+    "__version__",
+    
+    # Main API
+    "EvolutionOrchestrator",
+    "TaskRequest",
+    "TransferRequest",
+    "TaskResult",
+    "TransferResult",
+    
+    # Configuration
+    "load_config",
+    "save_config", 
+    "create_default_config",
 ]
+
+# Map attribute → sub-module that provides it
+_attr_to_module = {
+    # Main API
+    "EvolutionOrchestrator": "openspace_openhands_evolution.orchestrator",
+    "TaskRequest": "openspace_openhands_evolution.orchestrator",
+    "TransferRequest": "openspace_openhands_evolution.orchestrator",
+    "TaskResult": "openspace_openhands_evolution.orchestrator",
+    "TransferResult": "openspace_openhands_evolution.orchestrator",
+    
+    # Configuration
+    "load_config": "openspace_openhands_evolution.config_loader",
+    "save_config": "openspace_openhands_evolution.config_loader",
+    "create_default_config": "openspace_openhands_evolution.config_loader",
+}
+
+
+def __getattr__(name: str):
+    """Dynamically import sub-modules on first attribute access.
+    
+    This keeps the initial package import lightweight and avoids raising
+    ModuleNotFoundError for optional dependencies until explicitly used.
+    """
+    if name not in _attr_to_module:
+        raise AttributeError(f"module 'openspace_openhands_evolution' has no attribute '{name}'")
+    
+    module_name = _attr_to_module[name]
+    module = _imp(module_name)
+    value = getattr(module, name)
+    globals()[name] = value
+    return value
+
+
+def __dir__():
+    return sorted(list(globals().keys()) + list(_attr_to_module.keys()))
