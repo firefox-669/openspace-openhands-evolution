@@ -12,7 +12,7 @@ from enum import Enum
 from datetime import datetime, timezone
 
 from .openspace_engine import OpenSpaceEngine
-from .openhands_engine import OpenHandsEngine
+from .production_engine import ProductionOpenHandsEngine
 from .monitor import MonitorSystem
 from .governance import GovernanceLayer
 from .mtl_adapter import MTLAdapter
@@ -123,7 +123,14 @@ class EvolutionOrchestrator:
         
         # 初始化核心引擎
         self.openspace_engine = OpenSpaceEngine(config.get('openspace', {}))
-        self.openhands_engine = OpenHandsEngine(config.get('openhands', {}))
+        
+        # 使用生产级引擎（支持真实 LLM 和代码执行）
+        openhands_config = config.get('openhands', {})
+        llm_config = config.get('llm', {})
+        # 合并配置
+        production_config = {**openhands_config, **llm_config}
+        self.openhands_engine = ProductionOpenHandsEngine(production_config)
+        
         self.monitor = MonitorSystem(config.get('monitor', {}))
         self.governance = GovernanceLayer(config.get('governance', {}))
         

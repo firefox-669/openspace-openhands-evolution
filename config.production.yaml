@@ -1,0 +1,64 @@
+# OpenSpace-OpenHands-Evolution 生产环境配置
+# 
+# 复制此文件为 config.yaml 并填入你的 API keys
+
+# LLM 配置
+llm:
+  provider: openai  # openai, anthropic, ollama
+  model: gpt-4
+  api_key: "your-api-key-here"  # 或设置环境变量 OPENAI_API_KEY
+  
+  # Anthropic 配置（如果使用 Claude）
+  # provider: anthropic
+  # model: claude-3-opus-20240229
+  # api_key: "your-anthropic-key"
+  
+  # Ollama 本地模型配置
+  # provider: ollama
+  # model: llama2
+  # base_url: http://localhost:11434
+
+# OpenSpace 引擎配置
+openspace:
+  registry_path: ./data/skills
+  vector_db_enabled: false  # TODO: 启用向量数据库
+  chroma_path: ./data/chroma
+
+# OpenHands 引擎配置
+openhands:
+  sandbox_timeout: 30  # 代码执行超时时间（秒）
+  max_retries: 3  # 最大重试次数
+  enable_file_operations: true  # 允许文件操作
+  allowed_directories:  # 允许访问的目录
+    - ./workspace
+    - ./output
+
+# 监控配置
+monitor:
+  quality_threshold: 0.8  # 质量阈值
+  alert_channels:
+    - console  # console, email, slack
+  enable_anomaly_detection: true
+
+# 治理配置
+governance:
+  enable_gatekeeping: true
+  enable_negative_transfer_protection: true  # V-02
+  enable_environment_fingerprint: true  # V-06
+  
+# 跨项目迁移配置
+mtl:
+  min_similarity: 0.7  # 最小相似度阈值
+  enable_risk_assessment: true
+
+# AAIP 协议配置
+aaip:
+  version: "1.0.0"
+  enable_signature_verification: false  # TODO: 实现数字签名
+
+# 日志配置
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  file: ./logs/evolution.log
+  max_size_mb: 10
+  backup_count: 5

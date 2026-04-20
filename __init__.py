@@ -21,7 +21,7 @@ if _TYPE_CHECKING:
         create_default_config as create_default_config,
     )
 
-__version__ = "0.1.1"
+__version__ = "1.0.0"  # Production ready
 __author__ = "OpenSpace Team"
 
 __all__ = [

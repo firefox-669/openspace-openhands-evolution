@@ -224,10 +224,45 @@ async def main():
     
     # 加载配置
     try:
-        config = load_config(args.config)
+        import os
+        from pathlib import Path
+        
+        # 尝试加载配置文件
+        config_file = args.config
+        if not config_file:
+            # 自动查找配置文件
+            for cf in ['config.yaml', 'config.yml', 'config.production.yaml']:
+                if Path(cf).exists():
+                    config_file = cf
+                    print(f"📝 Loading configuration from {cf}...")
+                    break
+        
+        if config_file and Path(config_file).exists():
+            config = load_config(config_file)
+        else:
+            print("⚠️  No config file found, using defaults")
+            print("💡 Tip: Copy config.production.yaml to config.yaml and add your API keys\n")
+            config = {
+                'llm': {
+                    'provider': 'openai',
+                    'model': args.model or 'gpt-4',
+                    'api_key': os.getenv('OPENAI_API_KEY', '')
+                },
+                'openspace': {'registry_path': './data/skills'},
+                'openhands': {
+                    'model': args.model or 'gpt-4',
+                    'sandbox_timeout': 30,
+                    'max_retries': 3
+                },
+                'monitor': {'quality_threshold': 0.8},
+                'governance': {'enable_gatekeeping': True}
+            }
         
         # 应用命令行覆盖
         if args.model:
+            if 'llm' not in config:
+                config['llm'] = {}
+            config['llm']['model'] = args.model
             config['openhands']['model'] = args.model
         
         if args.verbose:
