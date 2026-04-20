@@ -9,6 +9,7 @@
 """
 
 import asyncio
+import logging
 from typing import List, Dict, Optional
 from datetime import datetime, timezone
 
@@ -19,6 +20,10 @@ from .llm_integration import LLMRouter
 def _now() -> str:
     """Get current UTC time as ISO string"""
     return datetime.now(timezone.utc).isoformat()
+
+
+# 配置日志
+logger = logging.getLogger(__name__)
 
 
 class ProductionOpenHandsEngine:
@@ -55,7 +60,7 @@ class ProductionOpenHandsEngine:
     
     async def execute(self, task, skills: List[Dict] = None) -> Dict:
         """
-        执行任务
+        执行任务（带重试机制）
         
         Args:
             task: 任务对象
@@ -64,7 +69,54 @@ class ProductionOpenHandsEngine:
         Returns:
             执行结果
         """
+        last_error = None
+        
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                print(f"   🚀 Attempt {attempt}/{self.max_retries}: {task.description}")
+                result = await self._execute_once(task, skills)
+                
+                # 如果成功，直接返回
+                if result.get("success"):
+                    return result
+                
+                # 记录错误但不立即重试
+                last_error = result.get("error", "Unknown error")
+                print(f"   ⚠️  Attempt {attempt} failed: {last_error[:100]}")
+                
+                # 如果不是最后一次尝试，等待后重试
+                if attempt < self.max_retries:
+                    wait_time = 2 ** (attempt - 1)  # 指数退避：1s, 2s, 4s...
+                    print(f"   ⏳ Retrying in {wait_time}s...")
+                    await asyncio.sleep(wait_time)
+                
+            except Exception as e:
+                last_error = str(e)
+                print(f"   ❌ Attempt {attempt} error: {e}")
+                
+                if attempt < self.max_retries:
+                    wait_time = 2 ** (attempt - 1)
+                    print(f"   ⏳ Retrying in {wait_time}s...")
+                    await asyncio.sleep(wait_time)
+        
+        # 所有重试都失败
+        print(f"   ❌ All {self.max_retries} attempts failed")
+        return {
+            "success": False,
+            "output": "",
+            "error": f"Failed after {self.max_retries} attempts. Last error: {last_error}",
+            "trace": {"error": last_error, "attempts": self.max_retries},
+            "metrics": {"execution_time": 0}
+        }
+    
+    async def _execute_once(self, task, skills: List[Dict] = None) -> Dict:
+        """
+        单次执行尝试
+        
+        四步流程：分析 → 生成 → 执行 → 验证
+        """
         start_time = datetime.now(timezone.utc)
+        logger.info(f"Starting execution for task: {task.id}")
         
         # 创建新的沙箱
         self.current_sandbox = ExecutionSandbox(timeout=self.sandbox_timeout)
@@ -90,6 +142,8 @@ class ProductionOpenHandsEngine:
             
             end_time = datetime.now(timezone.utc)
             duration = (end_time - start_time).total_seconds()
+            
+            logger.info(f"Task {task.id} completed in {duration:.2f}s, success={result['success']}")
             
             # 构建最终结果
             result = {
@@ -148,7 +202,7 @@ class ProductionOpenHandsEngine:
         ])
         
         prompt = f"""
-Analyze the following task and provide a structured plan:
+Analyze the following task and provide a structured plan in JSON format:
 
 Task: {task.description}
 Project: {getattr(task, 'project_id', 'N/A')}
@@ -158,25 +212,49 @@ Framework: {getattr(task, 'framework', 'N/A')}
 Available Skills:
 {skill_descriptions}
 
-Provide your analysis in JSON format with:
-- objectives: List of main objectives
-- steps: Step-by-step execution plan
-- required_skills: Which skills to use
-- potential_challenges: Possible issues
+Respond with ONLY valid JSON in this format:
+{{
+  "objectives": ["objective1", "objective2"],
+  "steps": ["step1", "step2", "step3"],
+  "required_skills": ["skill1", "skill2"],
+  "potential_challenges": ["challenge1", "challenge2"],
+  "estimated_complexity": "low|medium|high"
+}}
 """
         
         try:
+            import json
             response = await self.llm.generate(prompt)
-            # 这里应该解析 JSON，简化处理
+            
+            # 尝试提取 JSON
+            json_str = response
+            if "```json" in response:
+                start = response.find("```json") + 7
+                end = response.find("```", start)
+                json_str = response[start:end].strip()
+            elif "```" in response:
+                start = response.find("```") + 3
+                end = response.find("```", start)
+                json_str = response[start:end].strip()
+            
+            # 解析 JSON
+            analysis = json.loads(json_str)
             return {
-                "objectives": [task.description],
-                "steps": ["Analyze", "Implement", "Test"],
-                "analysis_text": response[:500]  # 截取前 500 字符
+                "objectives": analysis.get("objectives", [task.description]),
+                "steps": analysis.get("steps", ["Implement"]),
+                "required_skills": analysis.get("required_skills", []),
+                "potential_challenges": analysis.get("potential_challenges", []),
+                "complexity": analysis.get("estimated_complexity", "medium"),
+                "raw_analysis": response[:500]
             }
         except Exception as e:
+            # 回退方案
             return {
                 "objectives": [task.description],
-                "steps": ["Implement"],
+                "steps": ["Analyze requirements", "Implement solution", "Test and validate"],
+                "required_skills": [],
+                "potential_challenges": [f"Analysis error: {str(e)}"],
+                "complexity": "unknown",
                 "error": str(e)
             }
     
@@ -239,20 +317,94 @@ Code only, no explanations outside code blocks.
             return await self.current_sandbox.execute_python(code)
     
     async def _validate_results(self, execution_result: Dict, task) -> Dict:
-        """验证执行结果"""
-        success = execution_result.get("success", False)
-        stderr = execution_result.get("stderr", "")
+        """
+        验证执行结果
         
-        if success and not stderr:
-            return {
-                "success": True,
-                "message": "Execution completed successfully"
-            }
-        else:
+        包括：
+        - 执行状态检查
+        - 输出质量评估
+        - 错误分析
+        """
+        success = execution_result.get("success", False)
+        stdout = execution_result.get("stdout", "")
+        stderr = execution_result.get("stderr", "")
+        returncode = execution_result.get("returncode", -1)
+        duration = execution_result.get("duration", 0)
+        
+        # 基础验证
+        if not success:
             return {
                 "success": False,
-                "message": f"Execution failed: {stderr[:200]}"
+                "message": f"Execution failed with code {returncode}",
+                "error_type": "execution_error",
+                "details": stderr[:500],
+                "quality_score": 0.0
             }
+        
+        # 检查是否有错误输出
+        if stderr and len(stderr.strip()) > 0:
+            # 有 stderr 但不一定是错误（可能是警告）
+            is_warning = any(w in stderr.lower() for w in ['warning', 'deprecated', 'note'])
+            if not is_warning:
+                return {
+                    "success": False,
+                    "message": f"Runtime warnings/errors: {stderr[:200]}",
+                    "error_type": "runtime_warning",
+                    "details": stderr[:500],
+                    "quality_score": 0.5
+                }
+        
+        # 检查输出是否为空
+        if not stdout or len(stdout.strip()) == 0:
+            return {
+                "success": True,
+                "message": "Execution completed but produced no output",
+                "warning": "No output generated",
+                "quality_score": 0.6
+            }
+        
+        # 计算质量评分
+        quality_score = self._calculate_quality_score(execution_result, task)
+        
+        return {
+            "success": True,
+            "message": "Execution completed successfully",
+            "output_length": len(stdout),
+            "duration": duration,
+            "quality_score": quality_score,
+            "warnings": stderr if stderr else None
+        }
+    
+    def _calculate_quality_score(self, execution_result: Dict, task) -> float:
+        """
+        计算执行质量评分 (0.0 - 1.0)
+        
+        考虑因素：
+        - 执行时间
+        - 输出长度
+        - 是否有错误
+        """
+        score = 1.0
+        
+        # 执行时间过长扣分
+        duration = execution_result.get("duration", 0)
+        if duration > 10:
+            score -= 0.1
+        if duration > 20:
+            score -= 0.2
+        
+        # 输出长度为空扣分
+        stdout = execution_result.get("stdout", "")
+        if not stdout or len(stdout.strip()) == 0:
+            score -= 0.3
+        
+        # 有警告扣分
+        stderr = execution_result.get("stderr", "")
+        if stderr and len(stderr.strip()) > 0:
+            score -= 0.1
+        
+        # 确保分数在 0-1 之间
+        return max(0.0, min(1.0, score))
     
     async def get_status(self) -> Dict:
         """获取引擎状态"""
