@@ -55,6 +55,7 @@ logs/
 .coverage
 htmlcov/
 .pytest_cache/
+*.cover
 
 # Documentation build
 docs/_build/
