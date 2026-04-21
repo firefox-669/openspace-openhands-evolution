@@ -143,7 +143,7 @@ class ProductionOpenHandsEngine:
             end_time = datetime.now(timezone.utc)
             duration = (end_time - start_time).total_seconds()
             
-            logger.info(f"Task {task.id} completed in {duration:.2f}s, success={result['success']}")
+            logger.info(f"Task {task.id} completed in {duration:.2f}s, success={validation.get('success', False)}")
             
             # 构建最终结果
             result = {
