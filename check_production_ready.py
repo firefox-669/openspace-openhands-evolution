@@ -24,19 +24,19 @@ def check_dependencies():
     """检查依赖包"""
     print("\n📦 Checking dependencies...")
     required_packages = [
-        'litellm',
-        'pyyaml',
-        'asyncio',
+        ('litellm', 'litellm'),
+        ('pyyaml', 'yaml'),  # pyyaml 的模块名是 yaml
+        ('asyncio', 'asyncio'),
     ]
     
     missing = []
-    for package in required_packages:
+    for package_name, module_name in required_packages:
         try:
-            __import__(package.replace('-', '_'))
-            print(f"   ✅ {package}")
+            __import__(module_name)
+            print(f"   ✅ {package_name}")
         except ImportError:
-            print(f"   ❌ {package} (missing)")
-            missing.append(package)
+            print(f"   ❌ {package_name} (missing)")
+            missing.append(package_name)
     
     if missing:
         print(f"\n   Install missing packages: pip install {' '.join(missing)}")
