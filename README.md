@@ -1,6 +1,6 @@
 # Self-Optimizing Holo Evolution (SOHE)
 
-[![CI](https://github.com/yourusername/self-optimizing-holo-evolution/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/self-optimizing-holo-evolution/actions)
+[![CI](https://github.com/firefox-669/openspace-openhands-evolution/actions/workflows/ci.yml/badge.svg)](https://github.com/firefox-669/openspace-openhands-evolution/actions)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-1.1.0-orange.svg)](CHANGELOG.md)
@@ -34,8 +34,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/self-optimizing-holo-evolution.git
-cd self-optimizing-holo-evolution
+git clone https://github.com/firefox-669/openspace-openhands-evolution.git
+cd openspace-openhands-evolution
 
 # 2. Configure API Keys
 cp .env.example .env
@@ -52,8 +52,8 @@ docker-compose exec openspace-evolution python -m openspace_openhands_evolution 
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/yourusername/self-optimizing-holo-evolution.git
-cd self-optimizing-holo-evolution
+git clone https://github.com/firefox-669/openspace-openhands-evolution.git
+cd openspace-openhands-evolution
 pip install -e .
 
 # 2. Setup
