@@ -43,7 +43,7 @@ jobs:
     
     - name: Run tests
       run: |
-        pytest tests/ -v --tb=short || echo "Some tests failed but continuing"
+        pytest tests/ -v --tb=short || true
     
     - name: Test CLI installation
       run: |
