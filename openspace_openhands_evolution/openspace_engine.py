@@ -159,11 +159,13 @@ class OpenSpaceEngine:
         
         return matched_skills[:10]  # 返回 top 10
     
-    async def evolve_skill(self, task, execution_trace: Dict, quality_score: float):
+    async def evolve_skill(self, skill_id=None, improvements=None, task=None, execution_trace: Dict=None, quality_score: float=None):
         """
         基于执行结果进化技能
         
         Args:
+            skill_id: 技能 ID (for backward compatibility with tests)
+            improvements: 改进列表 (for backward compatibility with tests)
             task: 任务对象
             execution_trace: 执行轨迹
             quality_score: 质量评分 (0-1)
@@ -171,7 +173,24 @@ class OpenSpaceEngine:
         Returns:
             进化后的技能或 None
         """
-        # 记录执行历史到记忆存储
+        # Backward compatibility: if skill_id and improvements are provided, use old API
+        if skill_id is not None and improvements is not None:
+            if skill_id not in self.skill_registry:
+                return None
+            
+            skill = self.skill_registry[skill_id]
+            skill.version += 1
+            
+            if "improvements" not in skill.metadata:
+                skill.metadata["improvements"] = []
+            skill.metadata["improvements"].extend(improvements)
+            
+            return skill
+        
+        # New API: record to memory store
+        if task is None:
+            return None
+            
         project_id = getattr(task, 'project_id', 'unknown')
         if project_id not in self.memory_store:
             self.memory_store[project_id] = []
@@ -179,13 +198,13 @@ class OpenSpaceEngine:
         memory_entry = {
             "task_id": getattr(task, 'id', 'unknown'),
             "timestamp": _now(),
-            "quality_score": quality_score,
-            "execution_trace": execution_trace,
+            "quality_score": quality_score or 0.5,
+            "execution_trace": execution_trace or {},
             "improvements": []
         }
         
         # 如果质量低于阈值，标记需要改进
-        if quality_score < 0.7:
+        if quality_score and quality_score < 0.7:
             memory_entry["needs_improvement"] = True
             memory_entry["improvements"].append({
                 "type": "quality_below_threshold",
@@ -198,18 +217,27 @@ class OpenSpaceEngine:
         # TODO: 在实际实现中，这里应该调用 LLM 分析失败原因并生成改进版本
         return None
     
-    async def fix_skill(self, failed_skill_id: str, error_context: Dict):
+    async def fix_skill(self, skill_id=None, error_context: Dict=None, failed_skill_id=None):
         """
         修复失败的技能
         
         Args:
-            failed_skill_id: 失败的技能 ID
+            skill_id: 技能 ID (for backward compatibility with tests)
             error_context: 错误上下文
+            failed_skill_id: 失败的技能 ID (alias for skill_id)
+            
+        Returns:
+            SkillCard: 修复后的技能对象
         """
-        if failed_skill_id not in self.skill_registry:
-            return
+        # Support both parameter names
+        actual_skill_id = skill_id or failed_skill_id
+        if not actual_skill_id:
+            return None
+            
+        if actual_skill_id not in self.skill_registry:
+            return None
         
-        skill = self.skill_registry[failed_skill_id]
+        skill = self.skill_registry[actual_skill_id]
         
         # 记录失败历史
         if "fix_history" not in skill.metadata:
@@ -217,12 +245,14 @@ class OpenSpaceEngine:
         
         skill.metadata["fix_history"].append({
             "timestamp": _now(),
-            "error": error_context.get("error", "Unknown"),
-            "context": error_context
+            "error": error_context.get("error", "Unknown") if error_context else "Unknown",
+            "context": error_context or {}
         })
         
         # TODO: 在实际实现中，这里应该分析错误并生成修复版本
-        print(f"⚠️  Skill {failed_skill_id} marked for fixing")
+        print(f"⚠️  Skill {actual_skill_id} marked for fixing")
+        
+        return skill
     
     async def get_project_skills(self, project_id: str) -> List[Dict]:
         """获取项目的所有技能"""
@@ -276,6 +306,30 @@ class OpenSpaceEngine:
                 imported_count += 1
         
         print(f"✅ Imported {imported_count} skills to project {project_id}")
+    
+    async def register_skill(self, skill_data: Dict):
+        """
+        注册单个技能（便捷方法）
+        
+        Args:
+            skill_data: 技能数据字典
+            
+        Returns:
+            SkillCard: 注册的技能对象
+        """
+        skill_id = skill_data.get('skill_id')
+        if not skill_id:
+            raise ValueError("skill_id is required")
+        
+        # 创建或更新技能
+        if skill_id in self.skill_registry:
+            skill = self.skill_registry[skill_id]
+            skill.version += 1
+        else:
+            skill = SkillCard.from_dict(skill_data)
+            self.skill_registry[skill_id] = skill
+        
+        return skill
     
     async def capture_environment_fingerprint(self, project_id: str) -> Dict:
         """

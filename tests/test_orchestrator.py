@@ -7,6 +7,7 @@ from openspace_openhands_evolution import (
     TaskRequest,
     TransferRequest,
 )
+from .conftest import MockLLMProvider
 
 
 class TestTaskRequest:
@@ -78,10 +79,14 @@ class TestEvolutionOrchestrator:
     
     @pytest.fixture
     def config(self):
-        """Basic config for testing"""
+        """Basic config for testing with mock LLM"""
         return {
             'openspace': {'registry_path': './test_data/skills'},
-            'openhands': {'model': 'gpt-4'},
+            'openhands': {
+                'model': 'mock-gpt-4',
+                'api_key': 'test-key',
+                'llm_provider': MockLLMProvider(),
+            },
             'monitor': {'quality_threshold': 0.8},
             'governance': {'enable_gatekeeping': True}
         }
@@ -98,7 +103,11 @@ class TestEvolutionOrchestrator:
         """Test orchestrator with custom config"""
         config = {
             'openspace': {'registry_path': './custom'},
-            'openhands': {'model': 'claude-3'},
+            'openhands': {
+                'model': 'mock-claude-3',
+                'api_key': 'test-key',
+                'llm_provider': MockLLMProvider(),
+            },
             'monitor': {'quality_threshold': 0.9},
             'governance': {'enable_gatekeeping': False},
             'quality_threshold': 0.9,
@@ -153,7 +162,11 @@ class TestHierarchicalArchitecture:
         """Create orchestrator for testing"""
         config = {
             'openspace': {'registry_path': './test_data'},
-            'openhands': {'model': 'gpt-4'},
+            'openhands': {
+                'model': 'mock-gpt-4',
+                'api_key': 'test-key',
+                'llm_provider': MockLLMProvider(),
+            },
             'monitor': {'quality_threshold': 0.8},
         }
         return EvolutionOrchestrator(config)
@@ -190,7 +203,11 @@ class TestReasoningTrace:
         """Create orchestrator for testing"""
         config = {
             'openspace': {'registry_path': './test_data'},
-            'openhands': {'model': 'gpt-4'},
+            'openhands': {
+                'model': 'mock-gpt-4',
+                'api_key': 'test-key',
+                'llm_provider': MockLLMProvider(),
+            },
             'monitor': {'quality_threshold': 0.8},
         }
         return EvolutionOrchestrator(config)

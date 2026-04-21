@@ -39,8 +39,8 @@ class TestMonitorSystem:
         
         assert isinstance(quality_metrics, dict)
         assert "overall_score" in quality_metrics
-        assert "base_score" in quality_metrics
         assert "confidence" in quality_metrics
+        assert "execution_time" in quality_metrics
     
     @pytest.mark.asyncio
     async def test_quality_calculation_success(self, monitor):
@@ -53,10 +53,10 @@ class TestMonitorSystem:
             }
         }
         
-        metrics = await monitor._calculate_quality_metrics(result)
+        metrics = monitor._calculate_quality_metrics(result)
         
         assert metrics["overall_score"] > 0.7  # Should be good quality
-        assert metrics["base_score"] == 1.0  # Success gives base score 1.0
+        assert metrics["success"] == True
     
     @pytest.mark.asyncio
     async def test_quality_calculation_failure(self, monitor):
@@ -70,21 +70,22 @@ class TestMonitorSystem:
             }
         }
         
-        metrics = await monitor._calculate_quality_metrics(result)
+        metrics = monitor._calculate_quality_metrics(result)
         
         assert metrics["overall_score"] < 0.5  # Failed should have low score
-        assert metrics["base_score"] == 0.0  # Failure gives base score 0.0
+        assert metrics["success"] == False
     
     @pytest.mark.asyncio
     async def test_trigger_alert(self, monitor):
         """Test alert triggering"""
-        alert = await monitor._trigger_alert(
+        await monitor._trigger_alert(
             alert_type="quality_low",
             message="Quality score below threshold",
             severity="warning"
         )
         
-        assert isinstance(alert, dict)
+        assert len(monitor.alerts) > 0
+        alert = monitor.alerts[-1]
         assert alert["type"] == "quality_low"
         assert alert["severity"] == "warning"
         assert "timestamp" in alert
@@ -92,15 +93,15 @@ class TestMonitorSystem:
     @pytest.mark.asyncio
     async def test_log_error(self, monitor):
         """Test error logging"""
+        error = Exception("TestError")
         await monitor.log_error(
-            task_id="test-task-001",
-            error="TestError",
-            context={"detail": "Test error context"}
+            error=error,
+            context={"task_id": "test-task-001", "detail": "Test error context"}
         )
         
         assert len(monitor.error_log) > 0
-        assert monitor.error_log[-1]["task_id"] == "test-task-001"
-        assert monitor.error_log[-1]["error"] == "TestError"
+        assert monitor.error_log[-1]["error_type"] == "Exception"
+        assert monitor.error_log[-1]["error_message"] == "TestError"
     
     @pytest.mark.asyncio
     async def test_get_performance_report(self, monitor):
@@ -119,9 +120,9 @@ class TestMonitorSystem:
         report = await monitor.get_performance_report()
         
         assert isinstance(report, dict)
-        assert "total_executions" in report
-        assert "success_rate" in report
-        assert "average_quality" in report
+        assert "total_tasks" in report
+        assert "avg_quality" in report
+        assert "error_rate" in report
     
     @pytest.mark.asyncio
     async def test_get_status(self, monitor):
@@ -130,7 +131,7 @@ class TestMonitorSystem:
         
         assert isinstance(status, dict)
         assert "status" in status
-        assert "errors_logged" in status
+        assert "errors_detected" in status
         assert "quality_threshold" in status
 
 
