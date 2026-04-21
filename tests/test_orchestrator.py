@@ -85,7 +85,7 @@ class TestEvolutionOrchestrator:
             'openhands': {
                 'model': 'mock-gpt-4',
                 'api_key': 'test-key',
-                'llm_provider': MockLLMProvider(),
+                'provider': 'mock',
             },
             'monitor': {'quality_threshold': 0.8},
             'governance': {'enable_gatekeeping': True}
@@ -106,7 +106,7 @@ class TestEvolutionOrchestrator:
             'openhands': {
                 'model': 'mock-claude-3',
                 'api_key': 'test-key',
-                'llm_provider': MockLLMProvider(),
+                'provider': 'mock',
             },
             'monitor': {'quality_threshold': 0.9},
             'governance': {'enable_gatekeeping': False},
@@ -165,7 +165,7 @@ class TestHierarchicalArchitecture:
             'openhands': {
                 'model': 'mock-gpt-4',
                 'api_key': 'test-key',
-                'llm_provider': MockLLMProvider(),
+                'provider': 'mock',
             },
             'monitor': {'quality_threshold': 0.8},
         }
@@ -206,7 +206,7 @@ class TestReasoningTrace:
             'openhands': {
                 'model': 'mock-gpt-4',
                 'api_key': 'test-key',
-                'llm_provider': MockLLMProvider(),
+                'provider': 'mock',
             },
             'monitor': {'quality_threshold': 0.8},
         }

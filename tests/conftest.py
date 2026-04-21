@@ -31,7 +31,7 @@ def mock_llm_config():
         'openhands': {
             'model': 'mock-gpt-4',
             'api_key': 'test-key',
-            'llm_provider': MockLLMProvider(),
+            'provider': 'mock',  # Add provider type
         },
         'monitor': {
             'quality_threshold': 0.8,
