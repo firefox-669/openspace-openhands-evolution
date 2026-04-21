@@ -34,8 +34,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools wheel
-        pip install .
+        pip install setuptools>=61.0 wheel
+        pip install -e .
         pip install pytest pytest-asyncio litellm pyyaml
     
     - name: Run tests
@@ -111,8 +111,8 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install setuptools wheel
-        pip install .
+        pip install setuptools>=61.0 wheel
+        pip install -e .
     
     - name: Run production readiness check
       run: |
