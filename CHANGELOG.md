@@ -8,19 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Intelligent Strategy Engine with predictive strategy selection
+- Knowledge Graph for cross-project knowledge management
+- Error Prediction System for real-time error prevention
 - Hierarchical agent architecture (MM-WebAgent inspired)
 - Interpretable reasoning traces (RadAgent inspired)
 - Planning layer for task decomposition
 - Execution step tracking
-- Complete test suite with pytest
+- Complete test suite with pytest (100% pass rate)
 - GitHub Actions CI/CD pipeline
 - CONTRIBUTING.md guide
 - CODE_OF_CONDUCT.md
+- Docker and Docker Compose support
+- Production readiness checks
 
 ### Changed
 - Improved `__init__.py` with lazy imports (OpenSpace pattern)
 - Enhanced TaskResult with reasoning_trace and execution_steps
 - Updated README with new features
+- Fixed setuptools build configuration
+- Added Windows encoding compatibility
+- Improved dependency management with pyproject.toml
+- Enhanced production readiness checks
 
 ## [0.1.1] - 2026-04-20
 

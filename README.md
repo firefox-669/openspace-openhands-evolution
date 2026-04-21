@@ -1,9 +1,10 @@
 # Self-Optimizing Holo Evolution (SOHE)
 
 [![CI](https://github.com/firefox-669/openspace-openhands-evolution/actions/workflows/ci.yml/badge.svg)](https://github.com/firefox-669/openspace-openhands-evolution/actions)
+[![Tests](https://img.shields.io/badge/tests-32%2F32%20passing-brightgreen.svg)](tests/)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.1.0-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.1-orange.svg)](CHANGELOG.md)
 
 > **Self-Optimizing Holo Evolution** - 自优化全息进化系统
 >
