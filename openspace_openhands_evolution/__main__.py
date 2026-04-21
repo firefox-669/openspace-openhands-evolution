@@ -4,18 +4,18 @@ Self-Optimizing Holo Evolution (SOHE) 命令行入口
 自优化全息进化系统 - 生产级 AI 编程助手
 """
 
-# Set UTF-8 encoding for Windows compatibility
+import asyncio
+import argparse
+import sys
 import os
+from typing import Optional
+
+# Set UTF-8 encoding for Windows compatibility
 if sys.platform == 'win32':
     os.environ['PYTHONIOENCODING'] = 'utf-8'
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-
-import asyncio
-import argparse
-import sys
-from typing import Optional
 
 from .orchestrator import EvolutionOrchestrator, TaskRequest
 from .config_loader import load_config
