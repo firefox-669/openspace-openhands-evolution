@@ -52,7 +52,9 @@ Issues = "https://github.com/yourusername/self-optimizing-holo-evolution/issues"
 Changelog = "https://github.com/yourusername/self-optimizing-holo-evolution/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
+where = ["."]
 include = ["openspace_openhands_evolution*"]
+namespaces = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
