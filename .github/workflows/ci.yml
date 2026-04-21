@@ -35,7 +35,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install setuptools>=61.0 wheel
-        pip install -e .
+        echo "Installing package in editable mode..."
+        pip install -e . -v
+        echo "Checking installation..."
+        python -c "import openspace_openhands_evolution; print('✅ Package imported successfully')"
         pip install pytest pytest-asyncio litellm pyyaml
     
     - name: Run tests
