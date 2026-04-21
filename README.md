@@ -86,49 +86,389 @@ mkdir -p data/skills workspace output logs
 
 ## Quick Start
 
-### Command Line
+### Installation
 
 ```bash
-# Interactive mode
-openspace-evolution
+# Clone the repository
+git clone https://github.com/firefox-669/openspace-openhands-evolution.git
+cd openspace-openhands-evolution
 
-# Run a single task
-openspace-evolution run "Create a Flask API"
+# Install in development mode
+pip install -e .
 
-# Check status
-openspace-evolution status
-
-# Cross-project transfer
-openspace-evolution transfer --from project-a --to project-b
+# Verify installation
+sohe --help
 ```
 
-### Python API
+### Configuration
+
+Create a `.env` file or set environment variables:
+
+```bash
+# For OpenAI GPT-4
+export OPENAI_API_KEY="your-api-key-here"
+
+# For Anthropic Claude
+export ANTHROPIC_API_KEY="your-api-key-here"
+
+# For Ollama (local, no API key needed)
+# Just install Ollama: https://ollama.ai/
+```
+
+Or create `config.yaml`:
+
+```yaml
+openhands:
+  model: "gpt-4"
+  api_key: "your-api-key"
+  
+monitor:
+  quality_threshold: 0.8
+  
+governance:
+  enabled: true
+```
+
+---
+
+## 💻 How to Use SOHE for Development
+
+### Method 1: Interactive Mode (Recommended for Beginners)
+
+Start interactive mode:
+
+```bash
+sohe
+```
+
+You'll see:
+
+```
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║   🚀 Self-Optimizing Holo Evolution (SOHE)               ║
+║      自优化全息进化系统 v1.1.1                            ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+
+🎯 交互模式 - 输入任务描述开始
+========================================
+输入 'help' 查看帮助，'exit' 退出
+
+>>> 
+```
+
+**Example Session**:
+
+```
+>>> 创建一个 Flask REST API，包含用户注册和登录功能
+
+🚀 执行任务: 创建一个 Flask REST API，包含用户注册和登录功能
+
+✅ 任务成功!
+   输出: from flask import Flask, request, jsonify
+         from werkzeug.security import generate_password_hash
+         ...
+   质量评分: 0.92
+   进化技能: skill-flask-api, skill-authentication
+
+>>> 为这个 API 添加 JWT token 认证
+
+🚀 执行任务: 为这个 API 添加 JWT token 认证
+
+✅ 任务成功!
+   输出: import jwt
+         from datetime import datetime, timedelta
+         ...
+   质量评分: 0.88
+   进化技能: skill-jwt-auth
+
+>>> status
+
+📊 系统状态
+========================================
+  OpenSpace Engine: running
+  OpenHands Engine: running
+  Monitor System:   running
+  Governance Layer: active
+
+>>> exit
+
+👋 再见！
+```
+
+---
+
+### Method 2: Single Task Mode (For Scripts/Automation)
+
+Execute a single task from command line:
+
+```bash
+sohe run "Create a Python script to scrape web data"
+```
+
+With custom options:
+
+```bash
+sohe run "Build a React component" \
+  --project my-web-app \
+  --model gpt-4 \
+  --config config.yaml
+```
+
+**Use Cases**:
+- CI/CD pipelines
+- Automated code generation
+- Batch processing
+
+---
+
+### Method 3: Cross-Project Skill Transfer
+
+Transfer learned skills between projects:
+
+```bash
+sohe transfer \
+  --from project-a \
+  --to project-b \
+  --min-similarity 0.7
+```
+
+**Example Scenario**:
+
+You built a Flask API in `project-a`, now start `project-b`:
+
+```bash
+# Transfer Flask skills to new project
+sohe transfer --from ecommerce-api --to blog-api
+
+# Now use transferred skills
+sohe run "Create a blog post API endpoint"
+```
+
+The system will:
+1. Find similar skills from `ecommerce-api`
+2. Adapt them to `blog-api` context
+3. Apply learned patterns automatically
+
+---
+
+### Method 4: Python API (For Integration)
+
+Integrate SOHE into your applications:
 
 ```python
 import asyncio
 from openspace_openhands_evolution import EvolutionOrchestrator, TaskRequest
 
-async def main():
+async def build_feature():
+    # Initialize orchestrator
     config = {
         'openspace': {'registry_path': './data/skills'},
-        'openhands': {'model': 'gpt-4'},
+        'openhands': {
+            'model': 'gpt-4',
+            'api_key': 'your-api-key'
+        },
         'monitor': {'quality_threshold': 0.8},
+        'governance': {'enabled': True}
     }
     
     orchestrator = EvolutionOrchestrator(config)
     
+    # Create task
     task = TaskRequest(
         id="task-001",
-        description="Create a Flask API",
-        project_id="my-app",
-        language="python"
+        description="Create a FastAPI endpoint for user profiles",
+        project_id="my-api-project",
+        language="python",
+        framework="fastapi"
     )
     
+    # Execute task
     result = await orchestrator.execute_task(task)
-    print(result.output)
+    
+    if result.success:
+        print(f"✅ Success! Output:\n{result.output}")
+        print(f"Quality Score: {result.metrics['overall_score']}")
+        print(f"Evolved Skills: {result.evolved_skills}")
+        
+        # Access reasoning trace for interpretability
+        for step in result.reasoning_trace:
+            print(f"Step {step['step']}: {step['action']}")
+            print(f"  Confidence: {step['confidence']}")
+    else:
+        print(f"❌ Failed: {result.error}")
 
-asyncio.run(main())
+asyncio.run(build_feature())
 ```
+
+**Advanced Usage**:
+
+```python
+# Monitor execution quality
+status = await orchestrator.get_system_status()
+print(f"Skills Count: {status['openspace']['skills_count']}")
+print(f"Avg Success Rate: {status['openspace']['avg_success_rate']}")
+
+# Get performance report
+report = await orchestrator.monitor.get_performance_report()
+print(f"Total Tasks: {report['total_tasks']}")
+print(f"Average Quality: {report['avg_quality']}")
+print(f"Error Rate: {report['error_rate']}%")
+```
+
+---
+
+## 🎯 Real-World Development Examples
+
+### Example 1: Build a Complete Web Application
+
+```bash
+# Step 1: Create backend API
+sohe run "Build a Flask REST API with user authentication and database"
+
+# Step 2: Add features iteratively
+sohe run "Add password reset functionality"
+sohe run "Add email verification"
+sohe run "Add rate limiting"
+
+# Step 3: Create frontend
+sohe run "Create React login page that connects to the API"
+sohe run "Create dashboard component"
+
+# Step 4: Deploy
+sohe run "Create Dockerfile and docker-compose.yml for deployment"
+```
+
+Each task builds on previous knowledge, improving over time!
+
+---
+
+### Example 2: Data Science Project
+
+```bash
+# Initialize project
+sohe run "Set up a data science project structure with Jupyter notebooks"
+
+# Data analysis
+sohe run "Load CSV data and perform exploratory data analysis"
+sohe run "Create visualization dashboard with Plotly"
+
+# Machine Learning
+sohe run "Train a classification model with scikit-learn"
+sohe run "Evaluate model performance and create confusion matrix"
+
+# Deployment
+sohe run "Create FastAPI endpoint for model inference"
+```
+
+---
+
+### Example 3: Bug Fixing & Refactoring
+
+```bash
+# Analyze existing code
+sohe run "Review this code and identify potential bugs"
+
+# Fix issues
+sohe run "Fix the memory leak in the data processing function"
+sohe run "Refactor this module to follow SOLID principles"
+
+# Add tests
+sohe run "Write unit tests for the authentication module"
+```
+
+---
+
+### Example 4: Learning New Frameworks
+
+```bash
+# Learn Django
+sohe run "Create a simple Django blog application"
+
+# The system learns Django patterns
+# Next time, it will be better at Django tasks
+
+sohe run "Add Django REST framework API"
+sohe run "Implement Django authentication"
+```
+
+Skills accumulate across projects!
+
+---
+
+## 🔍 Understanding the Output
+
+### Task Result Structure
+
+```python
+{
+    "success": True,
+    "output": "Generated code or response...",
+    "metrics": {
+        "overall_score": 0.92,
+        "execution_time": 15.3,
+        "confidence": 0.88
+    },
+    "evolved_skills": ["skill-flask", "skill-api-design"],
+    "reasoning_trace": [
+        {
+            "step": 1,
+            "action": "analyze_task",
+            "output": "Detected: framework=flask, type=api",
+            "confidence": 0.95
+        },
+        {
+            "step": 2,
+            "action": "select_strategy",
+            "strategy": "hierarchical_decomposition",
+            "confidence": 0.88
+        }
+    ],
+    "execution_steps": [
+        "Created app.py",
+        "Added routes",
+        "Implemented authentication"
+    ]
+}
+```
+
+### Quality Score Interpretation
+
+- **0.9 - 1.0**: Excellent production-ready code
+- **0.7 - 0.9**: Good quality, minor improvements needed
+- **0.5 - 0.7**: Acceptable, requires review
+- **< 0.5**: Poor quality, needs significant work
+
+---
+
+## ⚙️ Advanced Configuration
+
+### Custom Models
+
+```bash
+# Use different models
+sohe run "Task" --model claude-3-opus
+sohe run "Task" --model ollama/llama2
+```
+
+### Adjust Quality Threshold
+
+```yaml
+# config.yaml
+monitor:
+  quality_threshold: 0.9  # Stricter quality control
+```
+
+### Enable Verbose Mode
+
+```bash
+sohe run "Task" --verbose
+```
+
+Shows detailed reasoning and execution steps.
+
+---
 
 ## Project Status
 
