@@ -17,6 +17,9 @@ from .monitor import MonitorSystem
 from .governance import GovernanceLayer
 from .mtl_adapter import MTLAdapter
 from .aaip_protocol import AAIPProtocol
+from .strategy_engine import IntelligentExecutionStrategyEngine
+from .knowledge_graph import KnowledgeGraph
+from .error_prediction import RealTimeErrorPreventionSystem
 
 
 class RiskLevel(Enum):
@@ -138,6 +141,15 @@ class EvolutionOrchestrator:
         self.mtl_adapter = MTLAdapter(config.get('mtl', {}))
         self.aaip_protocol = AAIPProtocol(config.get('aaip', {}))
         
+        # 初始化智能策略引擎
+        self.strategy_engine = IntelligentExecutionStrategyEngine(config.get('strategy', {}))
+        
+        # 初始化知识图谱
+        self.knowledge_graph = KnowledgeGraph(config.get('knowledge_graph', {}).get('storage_path', './data/knowledge_graph'))
+        
+        # 初始化错误预测系统
+        self.error_prevention = RealTimeErrorPreventionSystem(config.get('error_prediction', {}))
+        
         # 质量阈值
         self.quality_threshold = config.get('quality_threshold', 0.8)
         self.skill_sharing_enabled = config.get('skill_sharing_enabled', True)
@@ -167,6 +179,29 @@ class EvolutionOrchestrator:
             if not approved:
                 raise GatekeepingError(reason)
             
+            # === 阶段 1.5: 错误预测与预防 ===
+            print("🔮 Phase 1.5: Error Prediction...")
+            task_type = self._classify_task_type(task)
+            prediction_result = await self.error_prevention.predict_and_prevent(
+                task_id=task.id,
+                task_type=task_type,
+                context=task.context
+            )
+            
+            if not prediction_result['should_proceed']:
+                print(f"⚠️  High risk detected, proceeding with caution")
+                print(f"   Risk Score: {prediction_result['prediction']['overall_risk_score']:.2f}")
+                for suggestion in prediction_result['prediction'].get('prevention_suggestions', []):
+                    print(f"   {suggestion}")
+            
+            # === 阶段 1.6: 智能策略选择 ===
+            print("🎯 Phase 1.6: Strategy Selection...")
+            selected_strategy = await self.strategy_engine.select_strategy(
+                task_type=task_type,
+                priority="balanced"
+            )
+            task.context['selected_strategy'] = selected_strategy
+            
             # === 阶段 2: 任务规划与执行 ===
             print("⚙️  Phase 2: Task Execution...")
             execution_result = await self._phase2_execute(task)
@@ -182,6 +217,37 @@ class EvolutionOrchestrator:
                 execution_result=execution_result,
                 quality_metrics=quality_metrics
             )
+            
+            # === 阶段 5: 记录执行结果到策略引擎和知识图谱 ===
+            print("📝 Phase 5: Recording Results...")
+            task_type = self._classify_task_type(task)
+            selected_strategy = task.context.get('selected_strategy', 'balanced')
+            
+            # 记录策略执行结果
+            await self.strategy_engine.record_execution_result(
+                task_id=task.id,
+                task_type=task_type,
+                strategy_type=selected_strategy,
+                success=execution_result.get('success', False),
+                execution_time=quality_metrics.get('execution_time', 0),
+                quality_score=quality_metrics.get('quality_score', 0),
+                error_type=execution_result.get('error_type'),
+                context={'project_id': task.project_id}
+            )
+            
+            # 如果失败，记录错误
+            if not execution_result.get('success'):
+                await self.error_prevention.record_execution_error(
+                    task_id=task.id,
+                    task_type=task_type,
+                    error_type=execution_result.get('error_type', 'unknown'),
+                    error_message=execution_result.get('error', 'Unknown error'),
+                    severity='medium',
+                    context={'project_id': task.project_id}
+                )
+            
+            # 更新知识图谱
+            await self._update_knowledge_graph(task, execution_result, evolved_skills)
             
             # 启动后台维护任务
             asyncio.create_task(self._background_maintenance())
@@ -604,5 +670,81 @@ class EvolutionOrchestrator:
             "openhands": await self.openhands_engine.get_status(),
             "monitor": await self.monitor.get_status(),
             "governance": await self.governance.get_status(),
+            "strategy_engine": {
+                "total_records": len(self.strategy_engine.history.records),
+                "current_strategy": self.strategy_engine.current_strategy
+            },
+            "knowledge_graph": {
+                "projects": len(self.knowledge_graph.projects),
+                "edges": len(self.knowledge_graph.edges),
+                "knowledge_items": len(self.knowledge_graph.knowledge_items)
+            },
+            "error_prevention": {
+                "error_patterns": len(self.error_prevention.db.patterns),
+                "error_records": len(self.error_prevention.db.error_records)
+            },
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
+    
+    def _classify_task_type(self, task: TaskRequest) -> str:
+        """
+        分类任务类型
+        
+        Args:
+            task: 任务请求
+            
+        Returns:
+            任务类型字符串
+        """
+        description_lower = task.description.lower()
+        
+        if any(keyword in description_lower for keyword in ['create', 'build', 'generate']):
+            return 'code_generation'
+        elif any(keyword in description_lower for keyword in ['fix', 'debug', 'repair']):
+            return 'bug_fixing'
+        elif any(keyword in description_lower for keyword in ['refactor', 'optimize', 'improve']):
+            return 'code_refactoring'
+        elif any(keyword in description_lower for keyword in ['test', 'validate']):
+            return 'testing'
+        elif any(keyword in description_lower for keyword in ['analyze', 'review']):
+            return 'code_analysis'
+        else:
+            return 'general'
+    
+    async def _update_knowledge_graph(self, task: TaskRequest, 
+                                     execution_result: Dict,
+                                     evolved_skills: List[str]):
+        """
+        更新知识图谱
+        
+        Args:
+            task: 任务请求
+            execution_result: 执行结果
+            evolved_skills: 进化后的技能列表
+        """
+        # 确保项目节点存在
+        if task.project_id not in self.knowledge_graph.projects:
+            self.knowledge_graph.add_project(
+                project_id=task.project_id,
+                name=f"Project {task.project_id}",
+                language=task.language,
+                framework=task.framework,
+                domain='software_development'
+            )
+        
+        # 添加知识项（进化的技能）
+        for skill_id in evolved_skills:
+            knowledge_item_id = f"skill_{skill_id}"
+            if knowledge_item_id not in self.knowledge_graph.knowledge_items:
+                self.knowledge_graph.add_knowledge_item(
+                    item_id=knowledge_item_id,
+                    item_type='skill',
+                    title=f"Evolved Skill: {skill_id}",
+                    description=f"Skill evolved from task: {task.description[:100]}",
+                    project_id=task.project_id,
+                    tags=[task.language, task.framework or 'generic'],
+                    quality_score=0.8
+                )
+        
+        # 保存图谱
+        self.knowledge_graph.save_graph()

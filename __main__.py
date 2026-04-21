@@ -1,7 +1,7 @@
 """
-OpenSpace-OpenHands-Evolution 命令行入口
+Self-Optimizing Holo Evolution (SOHE) 命令行入口
 
-提供类似 openspace 命令的 CLI 体验
+自优化全息进化系统 - 生产级 AI 编程助手
 """
 
 import asyncio
@@ -18,13 +18,11 @@ def print_banner():
     banner = """
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║   🚀 OpenSpace-OpenHands-Evolution                        ║
-║      Self-Evolving AI Programming Assistant               ║
+║   🚀 Self-Optimizing Holo Evolution (SOHE)               ║
+║      自优化全息进化系统 v1.1.0                            ║
 ║                                                           ║
-║   Make Your AI Programmer:                                ║
-║   • Smarter (自我进化)                                     ║
-║   • Low-Cost (成本优化)                                   ║
-║   • Cross-Project (跨项目复用)                             ║
+║   Production-ready self-evolving AI assistant            ║
+║   with intelligent strategy & knowledge graph            ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
     """
@@ -46,16 +44,16 @@ def print_help():
 💡 示例:
 
   # 交互模式
-  openspace-evolution
+  sohe
 
   # 执行单个任务
-  openspace-evolution run "创建 Flask API"
+  sohe run "创建 Flask API"
 
   # 跨项目迁移
-  openspace-evolution transfer --from project-a --to project-b
+  sohe transfer --from project-a --to project-b
 
   # 查看状态
-  openspace-evolution status
+  sohe status
 
 ⚙️  选项:
 
@@ -176,7 +174,7 @@ async def show_status(orchestrator: EvolutionOrchestrator):
 def create_parser() -> argparse.ArgumentParser:
     """创建参数解析器"""
     parser = argparse.ArgumentParser(
-        description='OpenSpace-OpenHands-Evolution - 自进化 AI 编程助手',
+        description='Self-Optimizing Holo Evolution (SOHE) - 自优化全息进化系统',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:

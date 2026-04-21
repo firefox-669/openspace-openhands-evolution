@@ -3,18 +3,18 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.backends._legacy:_Backend"
 
 [project]
-name = "openspace-openhands-evolution"
-version = "0.1.1"
-description = "Self-evolving AI programming assistant with hierarchical agent architecture"
+name = "self-optimizing-holo-evolution"
+version = "1.1.0"
+description = "Self-Optimizing Holo Evolution - Production-ready self-evolving AI programming assistant with intelligent strategy engine, knowledge graph, and error prediction"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.12"
 authors = [
     {name = "OpenSpace Team"}
 ]
-keywords = ["ai-agent", "self-evolving", "cli", "openhands", "openspace", "mtl", "aaip"]
+keywords = ["ai-agent", "self-evolving", "self-optimizing", "holo-evolution", "cli", "strategy-engine", "knowledge-graph", "error-prediction"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -41,14 +41,15 @@ dev = [
 ]
 
 [project.scripts]
+sohe = "openspace_openhands_evolution.__main__:run_main"
 openspace-evolution = "openspace_openhands_evolution.__main__:run_main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/openspace-openhands-evolution"
-Documentation = "https://github.com/yourusername/openspace-openhands-evolution#readme"
-Repository = "https://github.com/yourusername/openspace-openhands-evolution.git"
-Issues = "https://github.com/yourusername/openspace-openhands-evolution/issues"
-Changelog = "https://github.com/yourusername/openspace-openhands-evolution/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/yourusername/self-optimizing-holo-evolution"
+Documentation = "https://github.com/yourusername/self-optimizing-holo-evolution#readme"
+Repository = "https://github.com/yourusername/self-optimizing-holo-evolution.git"
+Issues = "https://github.com/yourusername/self-optimizing-holo-evolution/issues"
+Changelog = "https://github.com/yourusername/self-optimizing-holo-evolution/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["openspace_openhands_evolution*"]

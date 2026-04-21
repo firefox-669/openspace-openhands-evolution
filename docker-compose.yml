@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  openspace-evolution:
+    build: .
+    container_name: openspace-evolution
+    volumes:
+      # 持久化数据
+      - ./data:/app/data
+      - ./workspace:/app/workspace
+      - ./output:/app/output
+      - ./logs:/app/logs
+    environment:
+      # LLM API Keys (从 .env 文件加载)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      # 配置选项
+      - LOG_LEVEL=INFO
+      - QUALITY_THRESHOLD=0.8
+    ports:
+      - "8000:8000"  # 如果需要 Web 界面
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+# 可选：添加 Redis 用于缓存（未来扩展）
+#  redis:
+#    image: redis:7-alpine
+#    ports:
+#      - "6379:6379"
+#    volumes:
+#      - redis_data:/data
+#
+#volumes:
+#  redis_data:

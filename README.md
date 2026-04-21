@@ -1,16 +1,19 @@
-# OpenSpace-OpenHands-Evolution
+# Self-Optimizing Holo Evolution (SOHE)
 
-[![CI](https://github.com/yourusername/openspace-openhands-evolution/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/openspace-openhands-evolution/actions)
+[![CI](https://github.com/yourusername/self-optimizing-holo-evolution/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/self-optimizing-holo-evolution/actions)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.0.0-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-orange.svg)](CHANGELOG.md)
 
-Self-evolving AI programming assistant with hierarchical agent architecture and interpretable reasoning.
+> **Self-Optimizing Holo Evolution** - 自优化全息进化系统
+>
+> Production-ready self-evolving AI programming assistant with intelligent strategy engine, knowledge graph, and real-time error prediction.
 
 > **✅ PRODUCTION READY**: Real LLM integration, code execution sandbox, and governance system. Suitable for research, prototyping, and production use with proper configuration.
 
 ## ✨ Features
 
+### **Core Capabilities**
 - **🏗️ Hierarchical Agent Architecture** (MM-WebAgent inspired): Planning → Coordination → Execution layers
 - **🔍 Interpretable Reasoning** (RadAgent inspired): Complete reasoning trace for every task
 - **🧬 Self-Evolution**: Learn from failures and optimize skills automatically
@@ -18,23 +21,49 @@ Self-evolving AI programming assistant with hierarchical agent architecture and 
 - **🛡️ Governance**: 4-stage quality control (gatekeeping, monitoring, maintenance, evolution)
 - **💻 CLI Interface**: Easy-to-use command-line tool
 
+### **🆕 New in v1.1.0**
+- **🎯 Intelligent Strategy Engine**: Predictive strategy selection with historical analysis
+- **🕸️ Knowledge Graph**: Cross-project knowledge management and transfer
+- **🔮 Error Prediction**: Real-time error prediction and prevention system
+
 ## 🚀 Installation
 
-### Quick Start (Production Ready)
+### ⚡ Quick Start (Production Ready - 5 Minutes)
+
+**Option 1: Docker Compose (Recommended for Production)**
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/openspace-openhands-evolution.git
-cd openspace-openhands-evolution
+git clone https://github.com/yourusername/self-optimizing-holo-evolution.git
+cd self-optimizing-holo-evolution
 
-# 2. Install dependencies
+# 2. Configure API Keys
+cp .env.example .env
+nano .env  # Edit and add your API keys
+
+# 3. One-click deployment
+docker-compose up -d
+
+# 4. Run your first task
+docker-compose exec openspace-evolution python -m openspace_openhands_evolution run "Create a Flask API"
+```
+
+**Option 2: Local Installation (Development)**
+
+```bash
+# 1. Clone and install
+git clone https://github.com/yourusername/self-optimizing-holo-evolution.git
+cd self-optimizing-holo-evolution
 pip install -e .
 
-# 3. Setup production environment
+# 2. Setup
 python setup_production.py
 
-# 4. Follow the prompts to configure your API keys
+# 3. Run
+openspace-evolution
 ```
+
+📖 **Full Deployment Guide**: See [DEPLOYMENT.md](DEPLOYMENT.md) for production best practices, security, monitoring, and troubleshooting.
 
 ### Manual Setup
 
@@ -102,7 +131,7 @@ asyncio.run(main())
 
 ## Project Status
 
-**Version**: 1.0.0 - Production Ready with Enhanced Features 🎉
+**Version**: 1.1.0 - Production Ready with Enhanced Features 🎉
 
 ### ✅ What's Implemented
 
@@ -119,7 +148,10 @@ asyncio.run(main())
 - ✅ **Cross-Project Transfer**: MTL + AAIP protocol
 - ✅ **Safety Mechanisms**: V-02 negative transfer, V-06 environment fingerprint
 
-#### Enhanced Features (v1.0.0)
+#### Enhanced Features (v1.1.0)
+- ✅ **Intelligent Strategy Engine**: Predictive strategy selection
+- ✅ **Knowledge Graph**: Cross-project knowledge management
+- ✅ **Error Prediction**: Real-time error prevention
 - ✅ **Smart JSON Parsing**: Automatic extraction and parsing of LLM responses
 - ✅ **Quality Metrics**: Execution time, output length, warning detection
 - ✅ **Error Classification**: Distinguish between errors, warnings, and notes

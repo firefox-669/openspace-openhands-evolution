@@ -21,7 +21,7 @@ if _TYPE_CHECKING:
         create_default_config as create_default_config,
     )
 
-__version__ = "1.0.0"  # Production ready
+__version__ = "1.1.0"  # Added strategy engine, knowledge graph, error prediction
 __author__ = "OpenSpace Team"
 
 __all__ = [
@@ -39,6 +39,22 @@ __all__ = [
     "load_config",
     "save_config", 
     "create_default_config",
+    
+    # Strategy Engine
+    "IntelligentExecutionStrategyEngine",
+    "StrategyHistory",
+    "PredictiveStrategySelector",
+    
+    # Knowledge Graph
+    "KnowledgeGraph",
+    "ProjectNode",
+    "KnowledgeEdge",
+    "KnowledgeItem",
+    
+    # Error Prediction
+    "RealTimeErrorPreventionSystem",
+    "ErrorPredictor",
+    "ErrorPatternDatabase",
 ]
 
 # Map attribute → sub-module that provides it
@@ -54,6 +70,22 @@ _attr_to_module = {
     "load_config": "openspace_openhands_evolution.config_loader",
     "save_config": "openspace_openhands_evolution.config_loader",
     "create_default_config": "openspace_openhands_evolution.config_loader",
+    
+    # Strategy Engine
+    "IntelligentExecutionStrategyEngine": "openspace_openhands_evolution.strategy_engine",
+    "StrategyHistory": "openspace_openhands_evolution.strategy_engine",
+    "PredictiveStrategySelector": "openspace_openhands_evolution.strategy_engine",
+    
+    # Knowledge Graph
+    "KnowledgeGraph": "openspace_openhands_evolution.knowledge_graph",
+    "ProjectNode": "openspace_openhands_evolution.knowledge_graph",
+    "KnowledgeEdge": "openspace_openhands_evolution.knowledge_graph",
+    "KnowledgeItem": "openspace_openhands_evolution.knowledge_graph",
+    
+    # Error Prediction
+    "RealTimeErrorPreventionSystem": "openspace_openhands_evolution.error_prediction",
+    "ErrorPredictor": "openspace_openhands_evolution.error_prediction",
+    "ErrorPatternDatabase": "openspace_openhands_evolution.error_prediction",
 }
 
 
